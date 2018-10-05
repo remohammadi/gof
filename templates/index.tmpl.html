@@ -1,7 +1,7 @@
 <html>
   {{template "header.tmpl.html"}}
 <body>
-  {{template "nav.tmpl.html"}}
+  {{template "nav.tmpl.html" .navStates}}
 
 <div class="jumbotron text-center">
   <div class="container">
@@ -9,9 +9,8 @@
       <img src="/static/lang-logo.png">
     </a>
     <h1>Game of Fakes</h1>
-    <h2>(TODO: we need to change the title, to avoid any influence on the control group 🤔)</h2>
     <p>TODO: A few sentences about the next step + Cookies 🍪 warning!</p>
-    <a type="button" class="btn btn-lg btn-default" href="/start"><span class="glyphiconglyphicon-flash"></span> Start</a>
+    <a type="button" class="btn btn-lg btn-default" href="/articles/1"><span class="glyphiconglyphicon-flash"></span> Start</a>
   </div>
 </div>
 

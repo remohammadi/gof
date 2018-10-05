@@ -1,0 +1,56 @@
+<html>
+  {{template "header.tmpl.html"}}
+<body>
+  {{template "nav.tmpl.html" .navStates}}
+
+  {{with .article}}
+  <div class="container article">
+    <div class="row">
+      <div class="col-xs-12">
+        <video controls width="100%" onpause="av_onpause(this);">
+            <source src="{{.src}}" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+        <br><br>
+      </div>
+    </div>
+    <div id="buttons" class="row">
+      <div class="col-xs-6">
+        <button id="manipulatedBtn" disabled onclick="av_judge(false)" data-toggle="modal" data-target="#results" type="button" class="btn btn-danger btn-lg btn-block">Manipulated</button>
+      </div>
+      <div class="col-xs-6">
+        <button id="genuineBtn" disabled onclick="av_judge(true)" data-toggle="modal" data-target="#results" type="button" class="btn btn-success btn-lg btn-block">Genuine</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="results" tabindex="-1" role="dialog" aria-labelledby="resultsLabel">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title" id="resultsLabel">
+            This video is {{if .referenceGenuine}}genuine{{else}}manipulated{{end}}.
+          </h4>
+        </div>
+        <div class="modal-body">
+            <div id="resultPassed" class="alert alert-success" role="alert">Well done!</div>
+            <div id="resultFailed" class="alert alert-danger" role="alert">Oh snap!</div>            
+            <p>TODO: A short description about the video</p>
+            <p><a href="details">More details&hellip;</a></p>
+        </div>
+        <div class="modal-footer">
+          <a href="{{.next}}" class="btn btn-primary">Next</a>
+          <a href="/results" class="btn btn-default">Enough for me</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  var referenceGenuine = {{.referenceGenuine}};
+  </script>
+  {{end}}
+
+</body>
+</html>
