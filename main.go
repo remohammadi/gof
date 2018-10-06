@@ -46,13 +46,30 @@ func main() {
 		id, err := strconv.Atoi(c.Param("id"))
 		if err != nil {
 			c.HTML(http.StatusBadRequest, "error.tmpl.html", gin.H{"navStates": defaultNav})
+			return
 		}
 		c.HTML(http.StatusOK, "article.tmpl.html", gin.H{
 			"navStates": defaultNav,
 			"article": gin.H{
 				"referenceGenuine": true,
+				"id":               id,
 				"src":              fmt.Sprintf("/static/videos/%d.mp4", id),
 				"next":             fmt.Sprintf("/articles/%d", id+1),
+			},
+		})
+	})
+
+	router.GET("/articles/:id/details", func(c *gin.Context) {
+		id, err := strconv.Atoi(c.Param("id"))
+		if err != nil {
+			c.HTML(http.StatusBadRequest, "error.tmpl.html", gin.H{"navStates": defaultNav})
+			return
+		}
+		c.HTML(http.StatusOK, "article-details.tmpl.html", gin.H{
+			"navStates": defaultNav,
+			"article": gin.H{
+				"id":   id,
+				"next": fmt.Sprintf("/articles/%d", id+1),
 			},
 		})
 	})

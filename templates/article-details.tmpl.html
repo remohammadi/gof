@@ -1,0 +1,13 @@
+<html>
+  {{template "header.tmpl.html"}}
+<body>
+  {{template "nav.tmpl.html" .navStates}}
+
+  {{with .article}}
+  <div class="container">
+    <p>This video was created by ...</p>
+  </div>
+  {{end}}
+
+</body>
+</html>
