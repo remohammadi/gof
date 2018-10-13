@@ -9,11 +9,15 @@ var getUserID = function() {
     }
     return userID;
   }
+  return ""
+}
+
+var getUserFP = function() {
   var client = new ClientJS();
   return client.getFingerprint();
 }
 
-function av_judge(genuine) {
+var av_judge = function(genuine) {
   var endTime = new Date();
   $("#buttons").hide();
   if (genuine == referenceGenuine) {
@@ -24,6 +28,7 @@ function av_judge(genuine) {
     $("#resultFailed").show();
   }
   $("#userID").val(getUserID());
+  $("#userFP").val(getUserFP());
   $("#userChoice").val(genuine);
   var diff = endTime.getTime() - window.startTime.getTime();
   $("#duration").val(diff);

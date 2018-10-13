@@ -6,9 +6,11 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
+	"github.com/remohammadi/gorm"
 )
 
 type navStates struct {
@@ -24,9 +26,13 @@ var (
 
 func main() {
 	port := os.Getenv("PORT")
-
 	if port == "" {
 		log.Fatal("$PORT must be set")
+	}
+	dbEngine := os.Getenv("DB_ENGINE")
+	dbParams := os.Getenv("DB_PARAMS")
+	if dbEngine == "" || dbParams == "" {
+		log.Fatal("$DB_ENGINE and $DB_PARAMS must be set")
 	}
 
 	loadedArticles, err := loadArticles("articles")
@@ -34,6 +40,13 @@ func main() {
 		log.Fatal("failed to load articles: ", err)
 	}
 	log.Printf("%d article(s) are loaded.", loadedArticles)
+
+	db, err := gorm.Open(dbEngine, dbParams)
+	if err != nil {
+		panic("failed to connect database")
+	}
+	db.AutoMigrate(&GenuinityOpinion{})
+	defer db.Close()
 
 	router := gin.New()
 	router.Use(gin.Logger())
@@ -87,15 +100,94 @@ func main() {
 			c.HTML(http.StatusBadRequest, "error.tmpl.html", gin.H{"navStates": defaultNav})
 			return
 		}
+		userFP, err := strconv.Atoi(c.PostForm("user-fp"))
+		if err != nil || userFP < 0 {
+			c.HTML(http.StatusBadRequest, "error.tmpl.html", gin.H{"navStates": defaultNav})
+			return
+		}
+		userChoice, err := strconv.ParseBool(c.PostForm("user-choice"))
+		if err != nil {
+			c.HTML(http.StatusBadRequest, "error.tmpl.html", gin.H{"navStates": defaultNav})
+			return
+		}
+		duration, err := strconv.Atoi(c.PostForm("duration"))
+		if err != nil || duration < 0 {
+			c.HTML(http.StatusBadRequest, "error.tmpl.html", gin.H{"navStates": defaultNav})
+			return
+		}
+
+		ipAddr := c.Request.Header.Get("x-forwarded-for")
+		if ipAddr != "" {
+			list := strings.Split(ipAddr, ",")
+			ipAddr = list[len(list)-1]
+		} else {
+			ipAddr = c.Request.RemoteAddr
+		}
+
+		opinion := GenuinityOpinion{
+			ArticleID:  uint16(articleID),
+			UserID:     c.PostForm("user-id"),
+			UserFP:     uint32(userFP),
+			UserChoice: userChoice,
+			UserIP:     ipAddr,
+			UserAgent:  c.Request.UserAgent(),
+			Duration:   uint32(duration),
+			IsCorrect:  userChoice == articles[articleID-1].IsGenuine,
+		}
+
+		q := db.Model(&GenuinityOpinion{}).
+			Where("article_id = ? AND user_id = ?", opinion.ArticleID, opinion.UserID)
+		if opinion.UserID == "" {
+			q = q.Where("user_fp = ?")
+		}
+		var count int
+		q.Count(&count)
+		if count > 0 {
+			now := gorm.NowFunc()
+			opinion.DeletedAt = &now
+		}
+		db.Create(&opinion)
+
 		if articleID < len(articles) {
 			c.Redirect(303, fmt.Sprintf("/articles/%d/", articleID+1))
 		} else {
-			c.Redirect(303, "/scores/")
+			c.Redirect(303, fmt.Sprintf("/scores/%s/", opinion.UserID))
 		}
 	})
 
-	router.GET("/scores/", func(c *gin.Context) {
-		c.HTML(http.StatusBadRequest, "error.tmpl.html", gin.H{"navStates": defaultNav})
+	router.GET("/scores/:user-id/", func(c *gin.Context) {
+		userID := c.Param("user-id")
+		opinions := make([]GenuinityOpinion, 0, len(articles))
+		db.Find(&opinions, "user_id = ?", userID)
+		total := len(opinions)
+		if total == 0 {
+			c.HTML(http.StatusBadRequest, "error.tmpl.html", gin.H{"navStates": defaultNav})
+		}
+		correct := 0
+		for _, o := range opinions {
+			if o.IsCorrect {
+				correct++
+			}
+		}
+		colors := make([]int, 11)
+		for i := range colors {
+			if i < correct {
+				colors[i] = 0
+			} else if i == correct {
+				colors[i] = 1
+			} else if i < 10 {
+				colors[i] = 2
+			} else {
+				colors[i] = 3
+			}
+		}
+		obj := gin.H{
+			"navStates": defaultNav,
+			"total":     total,
+			"correct":   correct,
+			"colors":    colors,
+		}
+		c.HTML(http.StatusOK, "scores.tmpl.html", obj)
 	})
 
 	router.Run(":" + port)

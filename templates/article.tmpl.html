@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="en">
-{{define "extra-header"}}<script type="text/javascript" src="/static/client.min.js?v=20181012001"></script>{{end}}
 {{template "header.tmpl.html"}}
 
 <body>
@@ -41,10 +40,11 @@
         </div>
         <div class="col">
           <form action="/submit/" method="POST">
-            <input type="text" name="article-id" value="{{.article.ID}}">
-            <input type="text" name="user-id" id="userID" value="">
-            <input type="text" name="user-choice" id="userChoice" value="">
-            <input type="text" name="duration" id="duration" value="">
+            <input type="hidden" name="article-id" value="{{.article.ID}}">
+            <input type="hidden" name="user-id" id="userID" value="">
+            <input type="hidden" name="user-fp" id="userFP" value="">
+            <input type="hidden" name="user-choice" id="userChoice" value="">
+            <input type="hidden" name="duration" id="duration" value="">
             <input type="submit" class="btn btn-primary btn-lg btn-block" value="Next ({{.progress}})">
           </form>
         </div>
