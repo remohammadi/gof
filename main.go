@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,7 +11,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/heroku/x/hmetrics/onload"
-	"github.com/remohammadi/gorm"
+	"github.com/jinzhu/gorm"
 )
 
 type navStates struct {
@@ -25,28 +26,39 @@ var (
 )
 
 func main() {
+	var err error
+
 	port := os.Getenv("PORT")
 	if port == "" {
 		log.Fatal("$PORT must be set")
 	}
-	dbEngine := os.Getenv("DB_ENGINE")
-	dbParams := os.Getenv("DB_PARAMS")
-	if dbEngine == "" || dbParams == "" {
-		log.Fatal("$DB_ENGINE and $DB_PARAMS must be set")
+
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		log.Fatal("$DATABASE_URL must be set")
 	}
+	var db *gorm.DB
+	if strings.HasPrefix(dbURL, "sqlite://") {
+		db, err = gorm.Open("sqlite3", dbURL[9:])
+	} else {
+		var rawDB gorm.SQLCommon
+		rawDB, err = sql.Open("postgres", os.Getenv("DATABASE_URL"))
+		if err != nil {
+			log.Fatalf("Error opening database: %q", err)
+		}
+		db, err = gorm.Open("postgres", rawDB)
+	}
+	if err != nil {
+		panic("failed to initiate database")
+	}
+	db.AutoMigrate(&GenuinityOpinion{})
+	defer db.Close()
 
 	loadedArticles, err := loadArticles("articles")
 	if err != nil {
 		log.Fatal("failed to load articles: ", err)
 	}
 	log.Printf("%d article(s) are loaded.", loadedArticles)
-
-	db, err := gorm.Open(dbEngine, dbParams)
-	if err != nil {
-		panic("failed to connect database")
-	}
-	db.AutoMigrate(&GenuinityOpinion{})
-	defer db.Close()
 
 	router := gin.New()
 	router.Use(gin.Logger())
