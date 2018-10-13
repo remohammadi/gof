@@ -12,14 +12,13 @@
     max-width: 75%;
     margin: 1em auto 2em; }
   .navbar + .jumbotron {
-    margin-top: -20px; }
+    margin-top: -30px; }
   .jumbotron .lang-logo {
     display: block;
-    background: #B01302;
     border-radius: 50%;
     overflow: hidden;
-    width: 100px;
-    height: 100px;
+    width: 180px;
+    height: 180px;
     margin: auto;
     border: 2px solid white; }
     .jumbotron .lang-logo img {
@@ -29,4 +28,18 @@
   margin: 0 auto;
   width: 100%;
   max-width: 700px;
+}
+
+.videoWrapper {
+	position: relative;
+	padding-bottom: 56.25%; /* 16:9 */
+	padding-top: 25px;
+	height: 0;
+}
+.videoWrapper iframe {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
 }

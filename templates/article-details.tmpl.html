@@ -2,12 +2,19 @@
   {{template "header.tmpl.html"}}
 <body>
   {{template "nav.tmpl.html" .navStates}}
-
-  {{with .article}}
-  <div class="container">
-    <p>This video was created by ...</p>
+  <div class="container article">
+    <br>
+    <a href=".." class="btn btn-outline-primary btn-lg"><span class="glyphicon glyphicon-back"></span> Back</a>
+    <br>
+    <h1>{{.article.Title}}</h1>
+    <p>{{.article.LongDesc}}</p>
+    <div class="row">
+      <div class="col">
+        {{template "article-content.tmpl.html" .article}}
+      </div>
+    </div>
+    <br>
   </div>
-  {{end}}
 
 </body>
 </html>

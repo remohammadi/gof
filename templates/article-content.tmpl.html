@@ -1,0 +1,3 @@
+{{if eq .Type 0}}{{template "article-content-video.tmpl.html" .}}
+{{else}}{{if eq .Type 1}}{{template "article-content-youtube.tmpl.html" .}}
+{{end}}{{end}}

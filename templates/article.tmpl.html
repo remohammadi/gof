@@ -1,55 +1,57 @@
-<html>
-  {{template "header.tmpl.html"}}
+<!doctype html>
+<html lang="en">
+{{define "extra-header"}}<script type="text/javascript" src="/static/client.min.js?v=20181012001"></script>{{end}}
+{{template "header.tmpl.html"}}
+
 <body>
   {{template "nav.tmpl.html" .navStates}}
-
-  {{with .article}}
   <div class="container article">
+    <br>
     <div class="row">
-      <div class="col-xs-12">
-        <video controls width="100%" onpause="av_onpause(this);">
-            <source src="{{.src}}" type="video/mp4">
-          Your browser does not support the video tag.
-        </video>
-        <br><br>
+      <div class="col">
+        {{template "article-content.tmpl.html" .article}}
       </div>
     </div>
+    <br>
     <div id="buttons" class="row">
-      <div class="col-xs-6">
-        <button id="manipulatedBtn" disabled onclick="av_judge(false)" data-toggle="modal" data-target="#results" type="button" class="btn btn-danger btn-lg btn-block">Manipulated</button>
+      <div class="col">
+        <button id="manipulatedBtn" onclick="av_judge(false)" data-toggle="modal" data-target="#results" type="button" class="btn btn-danger btn-lg btn-block">Manipulated</button>
       </div>
-      <div class="col-xs-6">
-        <button id="genuineBtn" disabled onclick="av_judge(true)" data-toggle="modal" data-target="#results" type="button" class="btn btn-success btn-lg btn-block">Genuine</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="modal fade" id="results" tabindex="-1" role="dialog" aria-labelledby="resultsLabel" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title" id="resultsLabel">
-            This video is {{if .referenceGenuine}}genuine{{else}}manipulated{{end}}.
-          </h4>
-        </div>
-        <div class="modal-body">
-            <div id="resultPassed" class="alert alert-success" role="alert">Well done!</div>
-            <div id="resultFailed" class="alert alert-danger" role="alert">Oh snap!</div>            
-            <p>TODO: A short description about the video</p>
-        </div>
-        <div class="modal-footer">
-          <a href="{{.id}}/details" class="btn btn-default">More details&hellip;</a>
-          <a href="/results" class="btn btn-default">Enough for me</a>
-          <a href="{{.next}}" class="btn btn-primary">Another case</a>
-        </div>
+      <div class="col">
+        <button id="genuineBtn" onclick="av_judge(true)" data-toggle="modal" data-target="#results" type="button" class="btn btn-success btn-lg btn-block">Genuine</button>
       </div>
     </div>
-  </div>
 
-<script>
-  var referenceGenuine = {{.referenceGenuine}};
-  </script>
-  {{end}}
+    <div id="result" style="display: none;">
+      {{with .article}}
+      <script>
+        var referenceGenuine = {{.IsGenuine}};
+      </script>
+      <div id="resultPassed" class="alert alert-success" role="alert">Well done!</div>
+      <div id="resultFailed" class="alert alert-danger" role="alert">Oh snap!</div>            
+      <h4>
+        This video is {{if .IsGenuine}}genuine{{else}}manipulated{{end}}.
+      </h4>
+      <p>{{.ShortDesc}}</p>
+      {{end}}
+
+      <div class="row">
+        <div class="col">
+          <a href="./details/">More details&hellip;</a>
+        </div>
+        <div class="col">
+          <form action="/submit/" method="POST">
+            <input type="text" name="article-id" value="{{.article.ID}}">
+            <input type="text" name="user-id" id="userID" value="">
+            <input type="text" name="user-choice" id="userChoice" value="">
+            <input type="text" name="duration" id="duration" value="">
+            <input type="submit" class="btn btn-primary btn-lg btn-block" value="Next ({{.progress}})">
+          </form>
+        </div>
+      </div>
+      <br>
+    </div>
+  </div>
 
 </body>
 </html>
