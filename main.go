@@ -195,6 +195,7 @@ func main() {
 		}
 		obj := gin.H{
 			"navStates": defaultNav,
+			"articles":  articles,
 			"total":     total,
 			"correct":   correct,
 			"colors":    colors,
