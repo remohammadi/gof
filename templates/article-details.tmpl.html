@@ -4,6 +4,11 @@
   {{template "nav.tmpl.html" .navStates}}
   <div class="container article">
     <br>
+    {{if .article.Warning}}
+    <div class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-triangle"></i> {{.article.Warning}}
+      </div>
+    {{end}}
     <a href=".." class="btn btn-outline-primary btn-lg"><span class="glyphicon glyphicon-back"></span> Back</a>
     <br>
     <h1>{{.article.Title}} <span class="badge badge-{{if .article.IsGenuine}}success{{else}}danger{{end}}">{{if .article.IsGenuine}}Genuine{{else}}Manipulated{{end}}</span></h1>
