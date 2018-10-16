@@ -6,6 +6,11 @@
   {{template "nav.tmpl.html" .navStates}}
   <div class="container article">
     <br>
+    {{if .article.Warning}}
+    <div class="alert alert-danger" role="alert">
+        <i class="fas fa-exclamation-triangle"></i> {{.article.Warning}}
+    </div>
+    {{end}}
     <div class="row">
       <div class="col">
         {{template "article-content.tmpl.html" .article}}

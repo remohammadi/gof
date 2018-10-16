@@ -24,6 +24,7 @@ type ArticleData struct {
 	Src       string      `json:"src"`
 	ShortDesc string      `json:"shortDescription"`
 	LongDesc  string      `json:"longDescription"`
+	Warning   string      `json:"warning"`
 }
 
 var articles = make([]*ArticleData, 0)
